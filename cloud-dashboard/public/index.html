@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>COG COMM LOG — 원격 조회</title>
+  <style>
+    :root {
+      --color-bg: #202225;
+      --color-surface: #2b2e33;
+      --color-border: #ffd400;
+      --color-accent: #ffd400;
+      --color-text-primary: #fff3a6;
+      --color-text-muted: #c7be78;
+      --color-info: #64b5f6;
+      --color-danger: #ff6b6b;
+    }
+    body {
+      margin: 0;
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    }
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header strong { color: var(--color-accent); letter-spacing: 1px; }
+    main { padding: 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--color-surface); }
+    th { color: var(--color-text-muted); font-weight: normal; }
+    tr.RX { color: var(--color-info); }
+    #status { color: var(--color-text-muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>COG COMM LOG</strong>
+    <span style="color: var(--color-text-muted); font-size: 12px;">원격 조회 전용 · 읽기 전용</span>
+  </header>
+  <main>
+    <p id="status">불러오는 중...</p>
+    <table>
+      <thead>
+        <tr>
+          <th>번호</th>
+          <th>발생 일시</th>
+          <th>방향</th>
+          <th>데이터</th>
+          <th>통신 상태</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </main>
+  <script>
+    async function load() {
+      const statusEl = document.getElementById("status");
+      try {
+        const res = await fetch("/api/logs?limit=200");
+        if (!res.ok) throw new Error("http_" + res.status);
+        const data = await res.json();
+        const rows = data.log_records || [];
+        document.getElementById("rows").innerHTML = rows
+          .map(
+            (r) => `<tr class="${r.direction === "RX" ? "RX" : ""}">
+              <td>${escapeHtml(r.display_number)}</td>
+              <td>${escapeHtml(r.occurred_at)}</td>
+              <td>${escapeHtml(r.direction)}</td>
+              <td>${escapeHtml(r.display_text)}</td>
+              <td>${escapeHtml(r.communication_status)}</td>
+            </tr>`
+          )
+          .join("");
+        statusEl.textContent = `${rows.length}건 · 마지막 갱신 ${new Date().toLocaleTimeString("ko-KR")}`;
+      } catch (err) {
+        statusEl.textContent = "불러오기 실패: " + err.message;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c]);
+    }
+
+    load();
+    setInterval(load, 5000);
+  </script>
+</body>
+</html>

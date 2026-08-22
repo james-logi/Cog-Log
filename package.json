@@ -1,0 +1,24 @@
+{
+  "name": "vision-inspection-log-program",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "cloud-dashboard"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "test": "npm run test -w backend --if-present && npm run test -w frontend --if-present",
+    "migrate": "npm run migrate -w backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "allowScripts": {
+    "sharp@0.33.5": true,
+    "workerd@1.20250718.0": true,
+    "esbuild@0.21.5": true
+  }
+}

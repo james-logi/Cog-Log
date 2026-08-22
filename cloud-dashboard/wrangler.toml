@@ -1,0 +1,9 @@
+name = "cog-comm-log-dashboard"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "public"
+
+# wrangler d1 create cog-comm-log 실행 후 나오는 database_id를 아래에 채운다.
+[[d1_databases]]
+binding = "DB"
+database_name = "cog-comm-log"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"

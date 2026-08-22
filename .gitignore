@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+*.log
+
+# runtime data
+*.db
+*.sqlite
+*.sqlite3
+backend/data/
+
+# wrangler (cloud-dashboard)
+.wrangler/
+cloud-dashboard/.wrangler/
+
+# env
+.env
+.env.*
+!.env.example
+
+# editor
+.DS_Store

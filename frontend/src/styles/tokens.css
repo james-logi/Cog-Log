@@ -1,0 +1,25 @@
+/* Design tokens from spec section 11.2 (디자인 토큰 초안). */
+:root {
+  --color-bg: #202225;
+  --color-surface: #2b2e33;
+  --color-surface-raised: #35393f;
+  --color-border: #ffd400;
+  --color-accent: #ffd400;
+  --color-accent-hover: #ffe45c;
+  --color-text-primary: #fff3a6;
+  --color-text-muted: #c7be78;
+  --color-success: #67d391;
+  --color-warning: #ffb74d;
+  --color-danger: #ff6b6b;
+  --color-info: #64b5f6;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --space-unit: 4px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+  margin: 0;
+}

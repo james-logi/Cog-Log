@@ -1,9 +1,19 @@
-name = "cog-comm-log-dashboard"
+# name은 Cloudflare에서 Git 연결로 이미 만들어진 프로젝트 이름과 반드시 같아야 한다.
+name = "cog-log"
+main = "src/index.ts"
 compatibility_date = "2024-09-23"
-pages_build_output_dir = "public"
 
-# wrangler d1 create cog-comm-log 실행 후 나오는 database_id를 아래에 채운다.
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+# D1: 아래 database_id는 "wrangler d1 create cog-comm-log" 실행 결과 또는
+# Cloudflare 대시보드(Workers & Pages → D1 → 데이터베이스 선택)에서 확인한
+# Database ID로 바꾼다. 스키마 적용 방법은 docs/cloud-dashboard-setup.md 참고.
 [[d1_databases]]
 binding = "DB"
 database_name = "cog-comm-log"
 database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# SYNC_API_KEY는 여기 넣지 않는다 — Cloudflare 대시보드의
+# Settings → Variables and Secrets에서 Secret으로 등록한다.

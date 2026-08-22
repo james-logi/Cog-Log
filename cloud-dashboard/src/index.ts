@@ -21,11 +21,17 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === "/api/ingest" && request.method === "POST") {
-      return handleIngest(request, env);
-    }
-    if (url.pathname === "/api/logs" && request.method === "GET") {
-      return handleLogs(request, env);
+    try {
+      if (url.pathname === "/api/ingest" && request.method === "POST") {
+        return await handleIngest(request, env);
+      }
+      if (url.pathname === "/api/logs" && request.method === "GET") {
+        return await handleLogs(request, env);
+      }
+    } catch (err) {
+      // D1 스키마 미적용 등으로 인한 예외를 Cloudflare 기본 에러 페이지 대신
+      // JSON으로 내려서 원인을 바로 알 수 있게 한다.
+      return json({ error: "internal_error", message: (err as Error).message }, 500);
     }
 
     return env.ASSETS.fetch(request);

@@ -13,7 +13,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "cog-comm-log"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "8ec6b463-fac2-4075-b98e-d034184e58f1"
 
 # SYNC_API_KEY는 여기 넣지 않는다 — Cloudflare 대시보드의
 # Settings → Variables and Secrets에서 Secret으로 등록한다.

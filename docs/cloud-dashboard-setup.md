@@ -28,12 +28,24 @@ Build 설정에서 **Root directory**를 `cloud-dashboard`로 지정한다.
 4. 복사해둔 Database ID를 알려주면, `cloud-dashboard/wrangler.toml`의
    `REPLACE_WITH_YOUR_D1_DATABASE_ID` 자리에 채워서 커밋·push하겠다.
 
-## 3. 수신 API 비밀키 설정 (대시보드에서)
+## 3. 수신 API 비밀키 설정
 
-1. 32자 정도의 임의 문자열을 하나 정한다(예: 비밀번호 생성기로 만든 값).
-2. cog-log 프로젝트 → **Settings** → **Variables and Secrets** →
-   **Add** → 이름 `SYNC_API_KEY`, 값은 방금 정한 문자열, 타입 **Secret**으로 저장.
-3. 이 값은 `backend/.env`의 `CLOUD_SYNC_API_KEY`에도 그대로 넣어야 한다(6단계).
+이 프로젝트(Git 연동 Workers Builds)에서는 대시보드의 "Runtime variables and
+secrets"에 Secret을 등록해도 실제 배포된 Worker에 붙지 않는 문제가 있었다
+(원인 불명 — Cloudflare 쪽 이슈로 보임). 그래서 `SYNC_API_KEY`는
+`cloud-dashboard/wrangler.toml`의 `[vars]`에 평문으로 넣는다:
+
+```toml
+[vars]
+SYNC_API_KEY = "여기에_값"
+```
+
+⚠️ 이렇게 하면 값이 GitHub 저장소에 그대로 노출된다. 값을 바꾸고 싶으면
+이 파일을 고쳐서 커밋·push하면 된다. 이 값은 `backend/.env`의
+`CLOUD_SYNC_API_KEY`에도 그대로 넣어야 한다(6단계).
+
+CLI 로그인이 가능하다면 `npx wrangler secret put SYNC_API_KEY`로 대신
+등록해볼 수도 있다 — 이 경로가 실제로 Git 배포에 반영되는지는 별도 확인 필요.
 
 ## 4. 재배포
 

@@ -15,5 +15,8 @@ binding = "DB"
 database_name = "cog-comm-log"
 database_id = "8ec6b463-fac2-4075-b98e-d034184e58f1"
 
-# SYNC_API_KEY는 여기 넣지 않는다 — Cloudflare 대시보드의
-# Settings → Variables and Secrets에서 Secret으로 등록한다.
+# SYNC_API_KEY: 대시보드 Secret 설정이 Git 연동 배포에 붙지 않는 문제가 있어
+# wrangler.toml에 직접 넣는다. 이 값은 저장소에 평문으로 노출된다는 뜻이므로
+# 실제 배포에서는 반드시 강력하고 유출돼도 큰 문제 없는 값으로 바꿀 것.
+[vars]
+SYNC_API_KEY = "1234"

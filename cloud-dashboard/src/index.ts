@@ -43,7 +43,19 @@ export default {
 async function handleIngest(request: Request, env: Env): Promise<Response> {
   const key = request.headers.get("x-sync-key");
   if (!env.SYNC_API_KEY || key !== env.SYNC_API_KEY) {
-    return json({ error: "unauthorized" }, 401);
+    // TEMP DEBUG(제거 예정): 실제 값은 절대 노출하지 않고 상태만 확인한다.
+    return json(
+      {
+        error: "unauthorized",
+        debug: {
+          envKeyConfigured: !!env.SYNC_API_KEY,
+          envKeyLength: env.SYNC_API_KEY?.length ?? 0,
+          receivedHeaderPresent: key !== null,
+          receivedLength: key?.length ?? 0,
+        },
+      },
+      401
+    );
   }
 
   let body: IngestBody;

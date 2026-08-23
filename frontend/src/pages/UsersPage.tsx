@@ -94,21 +94,26 @@ export function UsersPage() {
 
   return (
     <section>
-      <h1>사용자 관리</h1>
-      {error && <p style={{ color: "var(--color-danger)" }}>! {error}</p>}
-      {notice && <p style={{ color: "var(--color-success)" }}>{notice}</p>}
+      <div className="page-header">
+        <div>
+          <h1>사용자 관리</h1>
+          <div className="page-subtitle">계정 등록 및 권한 관리</div>
+        </div>
+      </div>
+      {error && <div className="banner banner-danger">! {error}</div>}
+      {notice && <div className="banner banner-success">{notice}</div>}
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 24 }}>
+      <form onSubmit={handleCreate} className="panel" style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 20 }}>
         <label>
-          <div>ID</div>
+          ID
           <input value={form.login_id} onChange={(e) => setForm({ ...form, login_id: e.target.value })} required />
         </label>
         <label>
-          <div>이름</div>
+          이름
           <input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} required />
         </label>
         <label>
-          <div>역할</div>
+          역할
           <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })}>
             {ROLES.map((r) => (
               <option key={r} value={r}>
@@ -118,7 +123,7 @@ export function UsersPage() {
           </select>
         </label>
         <label>
-          <div>초기 비밀번호</div>
+          초기 비밀번호
           <input
             type="password"
             value={form.password}
@@ -127,54 +132,58 @@ export function UsersPage() {
             minLength={8}
           />
         </label>
-        <button type="submit" disabled={creating}>
+        <button type="submit" className="btn-primary" disabled={creating}>
           등록
         </button>
       </form>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
-            <th>ID</th>
-            <th>이름</th>
-            <th>역할</th>
-            <th>활성</th>
-            <th>잠금</th>
-            <th>최근 로그인</th>
-            <th>작업</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id} style={{ borderBottom: "1px solid var(--color-surface-raised)" }}>
-              <td>{u.login_id}</td>
-              <td>{u.display_name}</td>
-              <td>
-                <select value={u.role} onChange={(e) => void updateUser(u.id, { role: e.target.value as Role })}>
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={!!u.is_active}
-                  onChange={(e) => void updateUser(u.id, { is_active: e.target.checked })}
-                />
-              </td>
-              <td>{u.locked_until ? "잠김" : "-"}</td>
-              <td>{u.last_login_at ?? "-"}</td>
-              <td>
-                <button onClick={() => void resetPassword(u.id)}>비밀번호 초기화</button>{" "}
-                <button onClick={() => void deleteUser(u.id)}>삭제</button>
-              </td>
+      <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>이름</th>
+              <th>역할</th>
+              <th>활성</th>
+              <th>잠금</th>
+              <th>최근 로그인</th>
+              <th>작업</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td className="mono">{u.login_id}</td>
+                <td>{u.display_name}</td>
+                <td>
+                  <select value={u.role} onChange={(e) => void updateUser(u.id, { role: e.target.value as Role })}>
+                    {ROLES.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={!!u.is_active}
+                    onChange={(e) => void updateUser(u.id, { is_active: e.target.checked })}
+                  />
+                </td>
+                <td>{u.locked_until ? <span className="pill pill-warning">잠김</span> : <span className="text-muted">-</span>}</td>
+                <td className="mono text-secondary" style={{ fontSize: 12 }}>
+                  {u.last_login_at ?? "-"}
+                </td>
+                <td style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => void resetPassword(u.id)}>비밀번호 초기화</button>
+                  <button onClick={() => void deleteUser(u.id)}>삭제</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

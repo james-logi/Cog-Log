@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.js";
 import { ApiError } from "../lib/api.js";
@@ -45,70 +45,44 @@ export function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        background:
+          "radial-gradient(circle at 50% -10%, rgba(255,195,0,0.06), transparent 45%), var(--color-bg)",
       }}
     >
       <form
         onSubmit={handleSubmit}
+        className="panel"
         style={{
-          width: 320,
-          padding: 32,
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-md)",
+          width: 340,
+          padding: "30px 32px 32px",
+          borderTop: "2px solid var(--color-accent)",
+          boxShadow: "var(--shadow-panel)",
         }}
       >
-        <h1 style={{ marginTop: 0, marginBottom: 4, fontSize: 20 }}>{PROGRAM_NAME}</h1>
-        <p style={{ marginTop: 0, marginBottom: 20, fontSize: 12, color: "var(--color-text-muted)" }}>
+        <div className="app-wordmark" style={{ fontSize: 18, marginBottom: 2 }}>
+          {PROGRAM_NAME}
+        </div>
+        <p className="text-muted" style={{ fontSize: 11, marginBottom: 24 }}>
           {PROGRAM_ATTRIBUTION}
         </p>
-        <label style={{ display: "block", marginBottom: 12 }}>
-          <span style={{ display: "block", marginBottom: 4, color: "var(--color-text-muted)" }}>ID</span>
-          <input
-            value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
-            autoFocus
-            required
-            style={inputStyle}
-          />
-        </label>
-        <label style={{ display: "block", marginBottom: 16 }}>
-          <span style={{ display: "block", marginBottom: 4, color: "var(--color-text-muted)" }}>PASSWORD</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={inputStyle}
-          />
-        </label>
-        {error && (
-          <p style={{ color: "var(--color-danger)", marginTop: 0 }}>! {error}</p>
-        )}
-        <button type="submit" disabled={submitting} style={buttonStyle}>
+
+        <div className="field-grid" style={{ marginBottom: error ? 12 : 22 }}>
+          <label>
+            ID
+            <input value={loginId} onChange={(e) => setLoginId(e.target.value)} autoFocus required />
+          </label>
+          <label>
+            PASSWORD
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </label>
+        </div>
+
+        {error && <div className="banner banner-danger">! {error}</div>}
+
+        <button type="submit" disabled={submitting} style={{ width: "100%" }}>
           {submitting ? "로그인 중..." : "로그인"}
         </button>
       </form>
     </div>
   );
 }
-
-const inputStyle: CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  padding: "8px 10px",
-  background: "var(--color-surface-raised)",
-  border: "1px solid var(--color-border)",
-  borderRadius: "var(--radius-sm)",
-  color: "var(--color-text-primary)",
-};
-
-const buttonStyle: CSSProperties = {
-  width: "100%",
-  padding: "10px 0",
-  background: "var(--color-accent)",
-  border: "none",
-  borderRadius: "var(--radius-sm)",
-  color: "var(--color-bg)",
-  fontWeight: 600,
-  cursor: "pointer",
-};

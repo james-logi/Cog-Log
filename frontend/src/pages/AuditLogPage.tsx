@@ -24,34 +24,55 @@ export function AuditLogPage() {
 
   return (
     <section>
-      <h1>감사 로그</h1>
-      {error && <p style={{ color: "var(--color-danger)" }}>! {error}</p>}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border)" }}>
-            <th>시각</th>
-            <th>작업</th>
-            <th>대상</th>
-            <th>요약</th>
-            <th>IP</th>
-            <th>결과</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} style={{ borderBottom: "1px solid var(--color-surface-raised)" }}>
-              <td>{r.occurred_at}</td>
-              <td>{r.action}</td>
-              <td>{r.target ?? "-"}</td>
-              <td>{r.change_summary ?? "-"}</td>
-              <td>{r.ip_address ?? "-"}</td>
-              <td style={{ color: r.success ? "var(--color-success)" : "var(--color-danger)" }}>
-                {r.success ? "✓ 성공" : "! 실패"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="page-header">
+        <div>
+          <h1>감사 로그</h1>
+          <div className="page-subtitle">로그인·사용자·설정·다운로드 이력</div>
+        </div>
+      </div>
+      {error && <div className="banner banner-danger">! {error}</div>}
+
+      <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table>
+            <thead>
+              <tr>
+                <th>시각</th>
+                <th>작업</th>
+                <th>대상</th>
+                <th>요약</th>
+                <th>IP</th>
+                <th>결과</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id}>
+                  <td className="mono text-secondary" style={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                    {r.occurred_at}
+                  </td>
+                  <td className="mono">{r.action}</td>
+                  <td className="text-secondary">{r.target ?? "-"}</td>
+                  <td className="text-secondary">{r.change_summary ?? "-"}</td>
+                  <td className="mono text-muted">{r.ip_address ?? "-"}</td>
+                  <td>
+                    <span className={`pill ${r.success ? "pill-success" : "pill-danger"}`}>
+                      {r.success ? "✓ 성공" : "! 실패"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 && !error && (
+                <tr>
+                  <td colSpan={6} className="text-muted" style={{ padding: "20px 10px", textAlign: "center" }}>
+                    기록이 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   );
 }

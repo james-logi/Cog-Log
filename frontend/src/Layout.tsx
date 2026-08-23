@@ -14,72 +14,50 @@ const NAV_ITEMS: Array<{ to: string; label: string; roles?: Role[] }> = [
   { to: "/system-status", label: "시스템 상태", roles: ["ADMIN", "OPERATOR"] },
 ];
 
+const ROLE_LABEL: Record<Role, string> = {
+  ADMIN: "관리자",
+  OPERATOR: "운영자",
+  VIEWER: "조회자",
+};
+
 export function Layout() {
   const { user, logout } = useAuth();
   const visibleItems = NAV_ITEMS.filter((item) => !item.roles || (user && item.roles.includes(user.role)));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "10px 16px",
-          borderBottom: "1px solid var(--color-border)",
-          background: "var(--color-surface)",
-        }}
-      >
-        <strong style={{ color: "var(--color-accent)", letterSpacing: 1, fontSize: 16 }}>{PROGRAM_NAME}</strong>
-        <span style={{ marginLeft: 12, color: "var(--color-text-muted)", fontSize: 12 }}>{PROGRAM_ATTRIBUTION}</span>
+    <div className="app-shell">
+      <header className="app-header">
+        <span className="app-wordmark">{PROGRAM_NAME}</span>
+        <span className="text-muted" style={{ fontSize: 11 }}>
+          {PROGRAM_ATTRIBUTION}
+        </span>
       </header>
-      <div style={{ display: "flex", flex: 1 }}>
-        <nav
-          style={{
-            width: 200,
-            borderRight: "1px solid var(--color-border)",
-            padding: "var(--space-unit)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ flex: 1 }}>
+      <div className="app-body">
+        <nav className="app-nav">
+          <div>
             {visibleItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.to === "/"}
-                style={({ isActive }) => ({
-                  display: "block",
-                  padding: "8px 12px",
-                  color: isActive ? "var(--color-accent)" : "var(--color-text-primary)",
-                  textDecoration: "none",
-                })}
+                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
               >
                 {item.label}
               </NavLink>
             ))}
           </div>
-          <div style={{ padding: "8px 12px", borderTop: "1px solid var(--color-border)" }}>
-            <div style={{ color: "var(--color-text-muted)", fontSize: 12 }}>
-              {user?.display_name} ({user?.role})
+          <div className="user-card">
+            <div className="user-card-name">
+              <strong>{user?.display_name}</strong>
+              <br />
+              {user ? ROLE_LABEL[user.role] : ""}
             </div>
-            <button
-              onClick={() => void logout()}
-              style={{
-                marginTop: 8,
-                background: "none",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-                color: "var(--color-text-primary)",
-                padding: "6px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={() => void logout()} style={{ width: "100%" }}>
               로그아웃
             </button>
           </div>
         </nav>
-        <main style={{ flex: 1, padding: "calc(var(--space-unit) * 4)" }}>
+        <main className="app-main">
           <Outlet />
         </main>
       </div>

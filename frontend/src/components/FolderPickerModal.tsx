@@ -52,30 +52,32 @@ export function FolderPickerModal({ initialPath, onSelect, onClose }: Props) {
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
-        <h2 style={{ marginTop: 0, fontSize: 16 }}>저장 폴더 선택</h2>
-        <p style={{ color: "var(--color-text-muted)", fontSize: 12, wordBreak: "break-all" }}>
+        <h2 style={{ marginTop: 0, fontSize: 15 }}>저장 폴더 선택</h2>
+        <p className="mono text-muted" style={{ fontSize: 12, wordBreak: "break-all" }}>
           {data?.path || "드라이브를 선택하세요"}
         </p>
-        {error && <p style={{ color: "var(--color-danger)" }}>! {error}</p>}
+        {error && <div className="banner banner-danger">! {error}</div>}
 
         <div style={listStyle}>
           {data?.path && (
-            <div style={itemStyle} onClick={() => load(data.parent ?? "")}>
-              .. (상위로)
+            <div className="folder-item" onClick={() => load(data.parent ?? "")}>
+              ↰ 상위 폴더
             </div>
           )}
           {data?.entries.map((entry) => (
-            <div key={entry.path} style={itemStyle} onClick={() => load(entry.path)}>
+            <div key={entry.path} className="folder-item" onClick={() => load(entry.path)}>
               📁 {entry.name}
             </div>
           ))}
           {data && data.entries.length === 0 && (
-            <div style={{ color: "var(--color-text-muted)", padding: 8 }}>하위 폴더 없음</div>
+            <div className="text-muted" style={{ padding: 10, fontSize: 12 }}>
+              하위 폴더 없음
+            </div>
           )}
         </div>
 
         {data?.path && (
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
             <input
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
@@ -92,7 +94,12 @@ export function FolderPickerModal({ initialPath, onSelect, onClose }: Props) {
           <button type="button" onClick={onClose}>
             취소
           </button>
-          <button type="button" disabled={!data?.path} onClick={() => data?.path && onSelect(data.path)}>
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={!data?.path}
+            onClick={() => data?.path && onSelect(data.path)}
+          >
             이 폴더 선택
           </button>
         </div>
@@ -118,21 +125,17 @@ const modalStyle: CSSProperties = {
   flexDirection: "column",
   background: "var(--color-surface)",
   border: "1px solid var(--color-border)",
-  borderRadius: "var(--radius-md)",
+  borderRadius: "var(--radius-lg)",
+  boxShadow: "var(--shadow-panel)",
   padding: 20,
 };
 
 const listStyle: CSSProperties = {
   flex: 1,
   overflowY: "auto",
-  border: "1px solid var(--color-surface-raised)",
+  background: "var(--color-surface-sunken)",
+  border: "1px solid var(--color-border-strong)",
   borderRadius: "var(--radius-sm)",
   minHeight: 240,
   maxHeight: 320,
-};
-
-const itemStyle: CSSProperties = {
-  padding: "6px 10px",
-  cursor: "pointer",
-  borderBottom: "1px solid var(--color-surface-raised)",
 };

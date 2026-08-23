@@ -8,7 +8,8 @@ import { AuditLogPage } from "./pages/AuditLogPage.js";
 import { MonitorPage } from "./pages/MonitorPage.js";
 import { ConnectionSettingsPage } from "./pages/ConnectionSettingsPage.js";
 import { StorageSettingsPage } from "./pages/StorageSettingsPage.js";
-import { LogsPage, SystemStatusPage } from "./pages/stubs.js";
+import { LogsPage } from "./pages/LogsPage.js";
+import { SystemStatusPage } from "./pages/SystemStatusPage.js";
 
 // 화면 접근 역할은 스펙 3장(사용자와 권한) 표 기준.
 export function App() {

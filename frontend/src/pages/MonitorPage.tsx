@@ -40,10 +40,10 @@ interface FileUpdatedPayload {
 }
 
 const FILE_STATUS_ICON: Record<FileStatus, string> = { WRITING: "…", SAVED: "✓", FAILED: "!" };
-const FILE_STATUS_COLOR: Record<FileStatus, string> = {
-  WRITING: "var(--color-text-muted)",
-  SAVED: "var(--color-success)",
-  FAILED: "var(--color-danger)",
+const FILE_STATUS_CLASS: Record<FileStatus, string> = {
+  WRITING: "pill-neutral",
+  SAVED: "pill-success",
+  FAILED: "pill-danger",
 };
 
 // 스펙 5.1 표
@@ -54,6 +54,14 @@ const STATUS_LABEL: Record<ConnectionStatus, string> = {
   CONNECTED: "연결됨",
   RECONNECTING: "재연결 중",
   ERROR: "오류",
+};
+const STATUS_PILL_CLASS: Record<ConnectionStatus, string> = {
+  STOPPED: "pill-neutral",
+  LISTENING: "pill-info",
+  CONNECTING: "pill-info",
+  CONNECTED: "pill-success",
+  RECONNECTING: "pill-warning",
+  ERROR: "pill-danger",
 };
 
 const MAX_DISPLAY = 1000; // 스펙 14 기본값
@@ -154,80 +162,122 @@ export function MonitorPage() {
 
   return (
     <section>
-      <h1>통신 모니터</h1>
-      {error && <p style={{ color: "var(--color-danger)" }}>! {error}</p>}
+      <div className="page-header">
+        <div>
+          <h1>모니터링</h1>
+          <div className="page-subtitle">실시간 통신 터미널</div>
+        </div>
+      </div>
 
-      <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 12 }}>
-        <span>
-          ● {STATUS_LABEL[status]} ({info?.mode ?? "-"})
+      {error && <div className="banner banner-danger">! {error}</div>}
+
+      <div
+        className="panel"
+        style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginBottom: 14, padding: "12px 16px" }}
+      >
+        <span className={`pill ${STATUS_PILL_CLASS[status]}`}>
+          ● {STATUS_LABEL[status]} · {info?.mode ?? "-"}
         </span>
         {info?.peerAddress && (
-          <span style={{ color: "var(--color-text-muted)" }}>
+          <span className="mono text-secondary" style={{ fontSize: 12 }}>
             {info.peerAddress}:{info.peerPort}
           </span>
         )}
-        {info?.lastError && <span style={{ color: "var(--color-danger)" }}>! {info.lastError}</span>}
+        {info?.lastError && <span style={{ color: "var(--color-danger)", fontSize: 12 }}>! {info.lastError}</span>}
         {info?.status === "RECONNECTING" && (
-          <span style={{ color: "var(--color-warning)" }}>
+          <span style={{ color: "var(--color-warning)", fontSize: 12 }}>
             재시도 {info.reconnectAttempt}회 · 다음 시도 {info.nextRetryAt}
           </span>
         )}
-        {canControl && (
-          <>
-            <button onClick={() => void start()} disabled={busy || status !== "STOPPED"}>
-              시작
-            </button>
-            <button onClick={() => void stop()} disabled={busy || status === "STOPPED"}>
-              중지
-            </button>
-          </>
-        )}
-        <button onClick={() => setRecords([])} title="화면 표시만 지웁니다. DB/파일 기록은 그대로 유지됩니다.">
-          화면 지우기
-        </button>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          {canControl && (
+            <>
+              <button onClick={() => void start()} disabled={busy || status !== "STOPPED"}>
+                시작
+              </button>
+              <button onClick={() => void stop()} disabled={busy || status === "STOPPED"}>
+                중지
+              </button>
+            </>
+          )}
+          <button onClick={() => setRecords([])} title="화면 표시만 지웁니다. DB/파일 기록은 그대로 유지됩니다.">
+            화면 지우기
+          </button>
+        </div>
       </div>
 
       <div
+        className="mono"
         style={{
-          height: 420,
+          height: 440,
           overflowY: "auto",
-          background: "var(--color-surface)",
+          background: "var(--color-surface-sunken)",
           border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-sm)",
-          padding: 8,
-          fontFamily: "monospace",
-          fontSize: 13,
+          borderRadius: "var(--radius-md)",
+          padding: "10px 4px",
+          fontSize: 12.5,
         }}
       >
+        {records.length === 0 && (
+          <div className="text-muted" style={{ padding: "8px 14px", fontFamily: "var(--font-ui)" }}>
+            표시할 기록이 없습니다.
+          </div>
+        )}
         {records.map((r) => (
-          <div key={r.id} style={{ color: r.direction === "RX" ? "var(--color-info)" : "var(--color-text-primary)" }}>
-            [{r.occurred_at}] {r.display_number} {r.direction} {r.display_text}{" "}
-            {r.communication_status === "FAILED" && (
-              <span style={{ color: "var(--color-danger)" }}>! {r.communication_error} </span>
-            )}
-            {r.txtStatus && (
-              <span style={{ color: FILE_STATUS_COLOR[r.txtStatus] }}>TXT {FILE_STATUS_ICON[r.txtStatus]} </span>
-            )}
-            {r.xlsxStatus && (
-              <span style={{ color: FILE_STATUS_COLOR[r.xlsxStatus] }}>XLSX {FILE_STATUS_ICON[r.xlsxStatus]}</span>
-            )}
+          <div
+            key={r.id}
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: 10,
+              padding: "3px 14px",
+              borderLeft: `2px solid ${r.direction === "RX" ? "var(--color-info)" : "var(--color-accent)"}`,
+            }}
+          >
+            <span className="text-muted" style={{ flexShrink: 0 }}>
+              {r.occurred_at}
+            </span>
+            <span className="text-secondary" style={{ flexShrink: 0 }}>
+              {r.display_number}
+            </span>
+            <span
+              style={{
+                flexShrink: 0,
+                fontWeight: 600,
+                color: r.direction === "RX" ? "var(--color-info)" : "var(--color-accent)",
+              }}
+            >
+              {r.direction}
+            </span>
+            <span style={{ color: "var(--color-text-primary)", wordBreak: "break-all" }}>{r.display_text}</span>
+            <span style={{ marginLeft: "auto", display: "flex", gap: 4, flexShrink: 0 }}>
+              {r.communication_status === "FAILED" && (
+                <span className="pill pill-danger">! {r.communication_error}</span>
+              )}
+              {r.txtStatus && (
+                <span className={`pill ${FILE_STATUS_CLASS[r.txtStatus]}`}>TXT {FILE_STATUS_ICON[r.txtStatus]}</span>
+              )}
+              {r.xlsxStatus && (
+                <span className={`pill ${FILE_STATUS_CLASS[r.xlsxStatus]}`}>XLSX {FILE_STATUS_ICON[r.xlsxStatus]}</span>
+              )}
+            </span>
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 12 }}>
-        최근 200건까지 자동으로 불러옵니다. 전체 검색·필터는 로그 조회 화면에서 제공될 예정입니다.
+      <p className="text-muted" style={{ fontSize: 11, marginTop: 8 }}>
+        최근 200건까지 자동으로 불러옵니다. 전체 검색·필터는 로그 조회 화면에서 제공됩니다.
       </p>
 
       {canControl && (
-        <form onSubmit={send} style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <form onSubmit={send} style={{ display: "flex", gap: 8, marginTop: 14 }}>
           <input
             value={sendText}
             onChange={(e) => setSendText(e.target.value)}
             placeholder="송신할 텍스트"
             style={{ flex: 1 }}
           />
-          <button type="submit" disabled={status !== "CONNECTED"}>
+          <button type="submit" className="btn-primary" disabled={status !== "CONNECTED"}>
             송신
           </button>
         </form>

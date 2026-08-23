@@ -85,16 +85,21 @@ export function ConnectionSettingsPage() {
 
   return (
     <section>
-      <h1>통신 설정</h1>
-      {error && <p style={{ color: "var(--color-danger)" }}>! {error}</p>}
-      {notice && <p style={{ color: "var(--color-success)" }}>{notice}</p>}
-      {needsRestart && (
-        <button onClick={() => void restart()} disabled={restarting}>
-          지금 재시작
-        </button>
-      )}
+      <div className="page-header">
+        <div>
+          <h1>통신 설정</h1>
+          <div className="page-subtitle">TCP Server/Client 연결 파라미터</div>
+        </div>
+        {needsRestart && (
+          <button className="btn-primary" onClick={() => void restart()} disabled={restarting}>
+            지금 재시작
+          </button>
+        )}
+      </div>
+      {error && <div className="banner banner-danger">! {error}</div>}
+      {notice && <div className="banner banner-success">{notice}</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, maxWidth: 420, marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="panel field-grid" style={{ maxWidth: 440 }}>
         <label>
           모드
           <select value={form.mode} onChange={(e) => setForm({ ...form, mode: e.target.value as "SERVER" | "CLIENT" })}>
@@ -181,12 +186,12 @@ export function ConnectionSettingsPage() {
 
         {form.mode === "CLIENT" && (
           <>
-            <label>
+            <label className="checkbox-row">
               <input
                 type="checkbox"
                 checked={form.reconnectEnabled}
                 onChange={(e) => setForm({ ...form, reconnectEnabled: e.target.checked })}
-              />{" "}
+              />
               자동 재접속
             </label>
             <label>
@@ -208,19 +213,19 @@ export function ConnectionSettingsPage() {
           </>
         )}
 
-        <hr style={{ border: "none", borderTop: "1px solid var(--color-surface-raised)" }} />
+        <hr className="section-divider" />
 
         <label>
           사이트 ID (예: 서울 사무실 — 클라우드 대시보드에서 이 값으로 구분됨)
           <input value={form.siteId ?? ""} onChange={(e) => setForm({ ...form, siteId: e.target.value })} placeholder="예: 서울 사무실" />
         </label>
 
-        <label>
+        <label className="checkbox-row">
           <input
             type="checkbox"
             checked={form.cloudSyncEnabled}
             onChange={(e) => setForm({ ...form, cloudSyncEnabled: e.target.checked })}
-          />{" "}
+          />
           클라우드 대시보드로 복제 전송
         </label>
 

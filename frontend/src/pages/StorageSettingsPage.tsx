@@ -59,27 +59,34 @@ export function StorageSettingsPage() {
 
   return (
     <section>
-      <h1>저장 설정</h1>
-      {error && <p style={{ color: "var(--color-danger)" }}>! {error}</p>}
-      {notice && <p style={{ color: "var(--color-success)" }}>{notice}</p>}
+      <div className="page-header">
+        <div>
+          <h1>저장 설정</h1>
+          <div className="page-subtitle">TXT/XLSX 파일 Export</div>
+        </div>
+      </div>
+      {error && <div className="banner banner-danger">! {error}</div>}
+      {notice && <div className="banner banner-success">{notice}</div>}
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, maxWidth: 420 }}>
-        <label>
-          <input
-            type="checkbox"
-            checked={form.txtEnabled}
-            onChange={(e) => setForm({ ...form, txtEnabled: e.target.checked })}
-          />{" "}
-          TXT 저장
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={form.xlsxEnabled}
-            onChange={(e) => setForm({ ...form, xlsxEnabled: e.target.checked })}
-          />{" "}
-          XLSX 저장
-        </label>
+      <form onSubmit={handleSubmit} className="panel field-grid" style={{ maxWidth: 440 }}>
+        <div style={{ display: "flex", gap: 20 }}>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={form.txtEnabled}
+              onChange={(e) => setForm({ ...form, txtEnabled: e.target.checked })}
+            />
+            TXT 저장
+          </label>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={form.xlsxEnabled}
+              onChange={(e) => setForm({ ...form, xlsxEnabled: e.target.checked })}
+            />
+            XLSX 저장
+          </label>
+        </div>
 
         <label>
           저장 경로 (백엔드 PC 기준)
@@ -88,7 +95,7 @@ export function StorageSettingsPage() {
               value={form.allowedRootPath}
               readOnly
               placeholder="폴더 선택 버튼으로 지정하세요"
-              style={{ flex: 1, background: "var(--color-surface-raised)", cursor: "not-allowed" }}
+              style={{ flex: 1 }}
             />
             <button type="button" onClick={() => setPickerOpen(true)}>
               폴더 선택
@@ -123,7 +130,7 @@ export function StorageSettingsPage() {
         </button>
       </form>
 
-      <p style={{ color: "var(--color-text-muted)", fontSize: 12, marginTop: 12 }}>
+      <p className="text-muted" style={{ fontSize: 12, marginTop: 12 }}>
         TXT/XLSX 파일은 이 설정에 따라 실시간으로 기록됩니다. 보존 정책에 따른 자동 삭제만 아직 미구현입니다
         (스펙 LOG-13, Admin 권한·감사 로그 필요).
       </p>

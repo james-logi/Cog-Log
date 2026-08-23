@@ -54,7 +54,7 @@ export function UsersPage() {
     }
   }
 
-  async function updateUser(id: string, patch: Partial<Pick<UserRow, "role" | "is_active">>) {
+  async function updateUser(id: string, patch: Partial<{ role: Role; is_active: boolean }>) {
     setError(null);
     try {
       await apiFetch(`/users/${id}`, { method: "PUT", body: JSON.stringify(patch) });

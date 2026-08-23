@@ -21,6 +21,7 @@
   쌓은 로그를 복제만 한다. 설정 방법은
   [docs/cloud-dashboard-setup.md](docs/cloud-dashboard-setup.md) 참고.
 - `docs/pre-development-checklist.md` — 스펙 17장 미확정 항목 추적
+- `docs/native-exe-packaging.md` — 현장 PC 배포용 단일 실행파일(.exe) 만들기
 
 ## 로컬 실행
 
@@ -48,8 +49,15 @@ npm run dev        # backend(4000) + frontend(5173) 동시 실행
   상호 테스트 완료.
 - 완료: 저장 설정 화면(폴더 선택기 포함) + TXT/XLSX 파일 Export 큐(실패
   자동/수동 재시도, 수식 주입 방지), 로컬 PC 폴더 브라우징 API.
-- 완료(선택 기능): 로컬 로그를 Cloudflare D1 기반 원격 조회 대시보드로
-  복제하는 큐(`backend/src/cloud/sync.ts`) — 기본 비활성, 설정 방법은
-  [docs/cloud-dashboard-setup.md](docs/cloud-dashboard-setup.md).
-- 미구현: 로그 조회 화면(DB 검색 API), 일정 관리, 시스템 상태, 보존 정책에
-  따른 자동 삭제. 고정 길이/길이 헤더 프레이밍은 17장 항목 확정 후 추가.
+- 완료(선택 기능): 여러 현장 PC를 구분하는 사이트 ID + 켜기/끄기 토글,
+  로컬 로그를 Cloudflare D1 기반 원격 조회 대시보드로 복제하는 큐
+  (`backend/src/cloud/sync.ts`, 기본 비활성) + 사이트별 필터/TXT·CSV
+  다운로드. 설정 방법은 [docs/cloud-dashboard-setup.md](docs/cloud-dashboard-setup.md).
+- 완료: 로그 조회 API(`GET /api/logs`, 기간/방향/상태/문자열 검색) — 모니터링
+  화면이 여기서 최근 기록을 다시 불러온다. 검색 전용 화면은 아직 없음.
+- 완료: 단일 실행파일(.exe) 패키징(`backend/npm run package:exe`) — Node
+  설치 없이 현장 PC에 exe 하나만 복사해서 실행 가능. 자동 시작/재시작(Windows
+  서비스 등록), 설치 마법사는 아직 없음. 자세한 내용은
+  [docs/native-exe-packaging.md](docs/native-exe-packaging.md).
+- 미구현: 일정 관리, 시스템 상태, 보존 정책에 따른 자동 삭제. 고정
+  길이/길이 헤더 프레이밍은 17장 항목 확정 후 추가.

@@ -19,6 +19,6 @@
   "allowScripts": {
     "sharp@0.33.5": true,
     "workerd@1.20250718.0": true,
-    "esbuild@0.21.5": true
+    "esbuild@0.24.2": true
   }
 }

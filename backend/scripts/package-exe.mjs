@@ -7,15 +7,22 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import esbuild from "esbuild";
 import { inject } from "postject";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 const BACKEND_ROOT = path.resolve(__dirname, "..");
 const REPO_ROOT = path.resolve(BACKEND_ROOT, "..");
 const FRONTEND_DIST = path.join(REPO_ROOT, "frontend", "dist");
 const MIGRATIONS_DIR = path.join(BACKEND_ROOT, "src", "db", "migrations");
+const SYSTRAY_HELPER_PATH = path.join(
+  path.dirname(require.resolve("systray2/package.json")),
+  "traybin",
+  "tray_windows_release.exe"
+);
 const OUT_DIR = path.join(BACKEND_ROOT, "dist-exe");
 const BUNDLE_PATH = path.join(OUT_DIR, "bundle.cjs");
 const BLOB_PATH = path.join(OUT_DIR, "sea-prep.blob");
@@ -74,6 +81,10 @@ async function main() {
   for (const file of fs.readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql"))) {
     assets[`migrations/${file}`] = path.join(MIGRATIONS_DIR, file).split(path.sep).join("/");
   }
+  if (!fs.existsSync(SYSTRAY_HELPER_PATH)) {
+    throw new Error(`systray helper binary not found: ${SYSTRAY_HELPER_PATH}`);
+  }
+  assets["systray-helper.exe"] = SYSTRAY_HELPER_PATH.split(path.sep).join("/");
   const seaConfig = {
     main: BUNDLE_PATH.split(path.sep).join("/"),
     output: BLOB_PATH.split(path.sep).join("/"),

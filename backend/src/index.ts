@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import http from "node:http";
+import path from "node:path";
 import readline from "node:readline";
 import { isSea } from "node:sea";
 import { config } from "./config/index.js";
@@ -12,6 +13,9 @@ import { exportQueue } from "./export/queue.js";
 import { cloudSync } from "./cloud/sync.js";
 import { runMigrations } from "./db/runMigrations.js";
 import { staticSiteMiddleware } from "./staticSite.js";
+import { isHiddenTrayChild, relaunchHiddenAndExit } from "./tray/hiddenLauncher.js";
+import { installFileLogging } from "./tray/fileLogger.js";
+import { startTray } from "./tray/tray.js";
 
 // 패키징된 exe를 탐색기에서 더블클릭해 실행하면, 프로세스가 죽는 순간 콘솔
 // 창도 같이 닫혀서 오류 메시지를 읽을 새가 없다. SEA로 실행 중일 때는
@@ -83,7 +87,26 @@ async function main() {
 
   server.listen(config.port, () => {
     console.log(`Backend listening on port ${config.port} (timezone: ${config.timezone})`);
+    // 트레이 아이콘은 "숨김 자식" 프로세스에서만 띄운다(보이는 콘솔로 직접
+    // 실행했거나 개발 모드일 땐 필요 없다). 트레이 초기화 실패는 부가 기능
+    // 문제일 뿐이니 서버 자체는 계속 떠 있어야 한다 — 전역 uncaughtException
+    // 처리(대화형 콘솔이 없는 숨김 프로세스에서는 응답 못 받는 Enter 대기로
+    // 이어짐)로 새지 않도록 여기서 직접 잡는다.
+    if (isHiddenTrayChild()) {
+      startTray(config.port, () => process.exit(0)).catch((err: Error) => {
+        console.error(`트레이 아이콘을 시작하지 못했습니다: ${err.message}`);
+      });
+    }
   });
 }
 
-void main();
+// SEA로 패키징된 exe를 더블클릭하면 창을 숨기고 트레이 아이콘으로 백그라운드
+// 실행한다. NO_TRAY=1을 설정하면(디버깅용) 원래대로 콘솔에 그대로 띄운다.
+if (isSea() && !isHiddenTrayChild() && process.env.NO_TRAY !== "1") {
+  relaunchHiddenAndExit();
+} else {
+  if (isHiddenTrayChild()) {
+    installFileLogging(path.join(process.cwd(), "coglog.log"));
+  }
+  void main();
+}

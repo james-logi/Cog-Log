@@ -40,6 +40,8 @@ function validateInput(body: unknown): ConnectionProfileInput | null {
     reconnectEnabled: Boolean(b.reconnectEnabled),
     reconnectInitialMs: b.reconnectInitialMs as number,
     reconnectMaxMs: b.reconnectMaxMs as number,
+    siteId: typeof b.siteId === "string" ? b.siteId : undefined,
+    cloudSyncEnabled: Boolean(b.cloudSyncEnabled),
   };
 }
 

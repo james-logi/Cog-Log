@@ -15,6 +15,8 @@ interface ConnectionProfile {
   reconnectEnabled: boolean;
   reconnectInitialMs: number;
   reconnectMaxMs: number;
+  siteId?: string;
+  cloudSyncEnabled: boolean;
 }
 
 // 스펙 14장 기본값
@@ -32,6 +34,8 @@ const DEFAULT_PROFILE: ConnectionProfile = {
   reconnectEnabled: true,
   reconnectInitialMs: 5000,
   reconnectMaxMs: 60000,
+  siteId: "",
+  cloudSyncEnabled: false,
 };
 
 export function ConnectionSettingsPage() {
@@ -203,6 +207,22 @@ export function ConnectionSettingsPage() {
             </label>
           </>
         )}
+
+        <hr style={{ border: "none", borderTop: "1px solid var(--color-surface-raised)" }} />
+
+        <label>
+          사이트 ID (예: 서울 사무실 — 클라우드 대시보드에서 이 값으로 구분됨)
+          <input value={form.siteId ?? ""} onChange={(e) => setForm({ ...form, siteId: e.target.value })} placeholder="예: 서울 사무실" />
+        </label>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={form.cloudSyncEnabled}
+            onChange={(e) => setForm({ ...form, cloudSyncEnabled: e.target.checked })}
+          />{" "}
+          클라우드 대시보드로 복제 전송
+        </label>
 
         <button type="submit">저장</button>
       </form>

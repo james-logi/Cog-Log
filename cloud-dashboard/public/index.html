@@ -27,6 +27,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
     header strong { color: var(--color-accent); letter-spacing: 1px; }
     main { padding: 20px; }
@@ -35,12 +36,33 @@
     th { color: var(--color-text-muted); font-weight: normal; }
     tr.RX { color: var(--color-info); }
     #status { color: var(--color-text-muted); font-size: 12px; }
+    select, input, button {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+    button { cursor: pointer; }
+    fieldset {
+      border: 1px solid var(--color-surface);
+      border-radius: 6px;
+      margin: 20px 0 0;
+      padding: 12px 16px;
+    }
+    legend { color: var(--color-text-muted); font-size: 12px; padding: 0 6px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--color-text-muted); }
   </style>
 </head>
 <body>
   <header>
     <strong>COG COMM LOG</strong>
     <span style="color: var(--color-text-muted); font-size: 12px;">원격 조회 전용 · 읽기 전용</span>
+    <label style="margin-left: auto; flex-direction: row; align-items: center; gap: 6px;">
+      사이트
+      <select id="siteSelect"><option value="">전체</option></select>
+    </label>
   </header>
   <main>
     <p id="status">불러오는 중...</p>
@@ -48,6 +70,7 @@
       <thead>
         <tr>
           <th>번호</th>
+          <th>사이트</th>
           <th>발생 일시</th>
           <th>방향</th>
           <th>데이터</th>
@@ -56,12 +79,62 @@
       </thead>
       <tbody id="rows"></tbody>
     </table>
+
+    <fieldset>
+      <legend>다운로드</legend>
+      <div class="row">
+        <label>
+          사이트
+          <select id="exportSite"><option value="">전체</option></select>
+        </label>
+        <label>
+          시작일
+          <input type="date" id="exportFrom" />
+        </label>
+        <label>
+          종료일
+          <input type="date" id="exportTo" />
+        </label>
+        <label>
+          형식
+          <select id="exportFormat">
+            <option value="txt">TXT</option>
+            <option value="csv">CSV (Excel용)</option>
+          </select>
+        </label>
+        <button id="downloadBtn" style="align-self: flex-end;">다운로드</button>
+      </div>
+    </fieldset>
   </main>
   <script>
+    let currentSite = localStorage.getItem("cog-log-site") || "";
+
+    async function loadSites() {
+      try {
+        const res = await fetch("/api/sites");
+        const data = await res.json();
+        const sites = data.sites || [];
+        for (const select of [document.getElementById("siteSelect"), document.getElementById("exportSite")]) {
+          for (const site of sites) {
+            const opt = document.createElement("option");
+            opt.value = site;
+            opt.textContent = site;
+            select.appendChild(opt);
+          }
+        }
+        document.getElementById("siteSelect").value = currentSite;
+        document.getElementById("exportSite").value = currentSite;
+      } catch {
+        // 사이트 목록을 못 불러와도 조회 자체는 계속 동작해야 하므로 조용히 무시한다.
+      }
+    }
+
     async function load() {
       const statusEl = document.getElementById("status");
       try {
-        const res = await fetch("/api/logs?limit=200");
+        const qs = new URLSearchParams({ limit: "200" });
+        if (currentSite) qs.set("site_id", currentSite);
+        const res = await fetch("/api/logs?" + qs.toString());
         if (!res.ok) throw new Error("http_" + res.status);
         const data = await res.json();
         const rows = data.log_records || [];
@@ -69,6 +142,7 @@
           .map(
             (r) => `<tr class="${r.direction === "RX" ? "RX" : ""}">
               <td>${escapeHtml(r.display_number)}</td>
+              <td>${escapeHtml(r.site_id || "-")}</td>
               <td>${escapeHtml(r.occurred_at)}</td>
               <td>${escapeHtml(r.direction)}</td>
               <td>${escapeHtml(r.display_text)}</td>
@@ -76,7 +150,7 @@
             </tr>`
           )
           .join("");
-        statusEl.textContent = `${rows.length}건 · 마지막 갱신 ${new Date().toLocaleTimeString("ko-KR")}`;
+        statusEl.textContent = `${currentSite ? "[" + currentSite + "] " : "[전체] "}${rows.length}건 · 마지막 갱신 ${new Date().toLocaleTimeString("ko-KR")}`;
       } catch (err) {
         statusEl.textContent = "불러오기 실패: " + err.message;
       }
@@ -92,6 +166,26 @@
       })[c]);
     }
 
+    document.getElementById("siteSelect").addEventListener("change", (e) => {
+      currentSite = e.target.value;
+      localStorage.setItem("cog-log-site", currentSite);
+      document.getElementById("exportSite").value = currentSite;
+      load();
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const site = document.getElementById("exportSite").value;
+      const from = document.getElementById("exportFrom").value;
+      const to = document.getElementById("exportTo").value;
+      const format = document.getElementById("exportFormat").value;
+      const qs = new URLSearchParams({ format });
+      if (site) qs.set("site_id", site);
+      if (from) qs.set("from", from + " 00:00:00");
+      if (to) qs.set("to", to + " 23:59:59");
+      window.location.href = "/api/export?" + qs.toString();
+    });
+
+    loadSites();
     load();
     setInterval(load, 5000);
   </script>

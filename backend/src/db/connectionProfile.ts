@@ -20,6 +20,8 @@ interface ProfileRow {
   reconnect_enabled: number;
   reconnect_initial_ms: number;
   reconnect_max_ms: number;
+  site_id: string | null;
+  cloud_sync_enabled: number;
 }
 
 export interface ConnectionProfileInput {
@@ -36,6 +38,8 @@ export interface ConnectionProfileInput {
   reconnectEnabled: boolean;
   reconnectInitialMs: number;
   reconnectMaxMs: number;
+  siteId?: string;
+  cloudSyncEnabled: boolean;
 }
 
 function rowToProfile(row: ProfileRow): ConnectionProfile {
@@ -55,6 +59,8 @@ function rowToProfile(row: ProfileRow): ConnectionProfile {
     reconnectEnabled: !!row.reconnect_enabled,
     reconnectInitialMs: row.reconnect_initial_ms,
     reconnectMaxMs: row.reconnect_max_ms,
+    siteId: row.site_id ?? undefined,
+    cloudSyncEnabled: !!row.cloud_sync_enabled,
   };
 }
 
@@ -81,14 +87,15 @@ export function saveConnectionProfile(input: ConnectionProfileInput): Connection
     `INSERT INTO connection_profiles (
        id, mode, bind_address, target_host, port, encoding, delimiter, max_message_bytes,
        connect_timeout_ms, read_idle_timeout_ms, reconnect_enabled, reconnect_initial_ms, reconnect_max_ms,
-       is_active, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
+       site_id, cloud_sync_enabled, is_active, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))
      ON CONFLICT(id) DO UPDATE SET
        mode = excluded.mode, bind_address = excluded.bind_address, target_host = excluded.target_host,
        port = excluded.port, encoding = excluded.encoding, delimiter = excluded.delimiter,
        max_message_bytes = excluded.max_message_bytes, connect_timeout_ms = excluded.connect_timeout_ms,
        read_idle_timeout_ms = excluded.read_idle_timeout_ms, reconnect_enabled = excluded.reconnect_enabled,
        reconnect_initial_ms = excluded.reconnect_initial_ms, reconnect_max_ms = excluded.reconnect_max_ms,
+       site_id = excluded.site_id, cloud_sync_enabled = excluded.cloud_sync_enabled,
        updated_at = datetime('now')`
   ).run(
     DEFAULT_PROFILE_ID,
@@ -103,7 +110,9 @@ export function saveConnectionProfile(input: ConnectionProfileInput): Connection
     input.readIdleTimeoutMs,
     input.reconnectEnabled ? 1 : 0,
     input.reconnectInitialMs,
-    input.reconnectMaxMs
+    input.reconnectMaxMs,
+    input.siteId?.trim() || null,
+    input.cloudSyncEnabled ? 1 : 0
   );
 
   return getOrCreateConnectionProfile();

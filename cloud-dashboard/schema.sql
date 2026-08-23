@@ -3,6 +3,7 @@
 -- ingest.ts의 ON CONFLICT(id) DO UPDATE로 항상 한 행만 남는다.
 CREATE TABLE IF NOT EXISTS log_records (
   id TEXT PRIMARY KEY,
+  site_id TEXT,
   daily_date TEXT NOT NULL,
   display_number TEXT NOT NULL,
   occurred_at TEXT NOT NULL,
@@ -13,3 +14,4 @@ CREATE TABLE IF NOT EXISTS log_records (
 );
 
 CREATE INDEX IF NOT EXISTS idx_log_records_occurred_at ON log_records (occurred_at);
+CREATE INDEX IF NOT EXISTS idx_log_records_site_id ON log_records (site_id);

@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { getDb } from "../db/connection.js";
 import { config } from "../config/index.js";
 import { parseDbTimestamp } from "../lib/time.js";
+import { getOrCreateConnectionProfile } from "../db/connectionProfile.js";
 import type { LogRecordRow } from "../export/queue.js";
 
 const RETRY_DELAYS_MS = [1000, 5000, 15000, 30000, 60000];
@@ -33,10 +34,12 @@ class CloudSyncQueue {
 
   enqueueForRecord(record: LogRecordRow) {
     if (!config.cloudSyncUrl) return;
+    if (!getOrCreateConnectionProfile().cloudSyncEnabled) return; // 통신 설정의 "클라우드 동기화" 토글
     void this.attempt(record);
   }
 
   private processDueRetries() {
+    if (!config.cloudSyncUrl || !getOrCreateConnectionProfile().cloudSyncEnabled) return;
     const db = getDb();
     const failed = db.prepare("SELECT * FROM cloud_sync_results WHERE sync_status = 'FAILED'").all() as SyncJobRow[];
     const now = Date.now();
@@ -68,11 +71,13 @@ class CloudSyncQueue {
     }
 
     try {
+      const siteId = getOrCreateConnectionProfile().siteId ?? null;
       const res = await fetch(`${config.cloudSyncUrl.replace(/\/$/, "")}/api/ingest`, {
         method: "POST",
         headers: { "content-type": "application/json", "x-sync-key": config.cloudSyncApiKey },
         body: JSON.stringify({
           id: record.id,
+          site_id: siteId,
           daily_date: record.daily_date,
           display_number: record.display_number,
           occurred_at: record.occurred_at,

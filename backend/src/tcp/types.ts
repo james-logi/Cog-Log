@@ -27,6 +27,8 @@ export interface ConnectionProfile {
   reconnectEnabled: boolean;
   reconnectInitialMs: number;
   reconnectMaxMs: number;
+  siteId?: string;
+  cloudSyncEnabled: boolean;
 }
 
 export interface ConnectionInfo {

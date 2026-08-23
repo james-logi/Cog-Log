@@ -71,6 +71,24 @@ CLOUD_SYNC_API_KEY=<3단계에서 정한 값>
 이후 새로 생기는 로그부터 자동으로 클라우드에 복제된다(`backend/src/cloud/sync.ts`).
 값을 비워두면 클라우드 전송은 완전히 비활성 상태로 유지된다(기본값).
 
+## 7. 멀티 사이트(site_id) 지원 — 추가 마이그레이션 필요
+
+여러 현장 PC에서 하나의 클라우드 대시보드로 복제하는 걸 지원하기 위해
+`log_records`에 `site_id` 컬럼이 추가됐다. **이미 만들어둔 D1 데이터베이스에는
+자동으로 반영되지 않으므로**, D1 → `cog-comm-log` → **Console** 탭에서 아래
+SQL을 한 번 실행해야 한다(`cloud-dashboard/migrations/0002_site_id.sql`과 동일):
+
+```sql
+ALTER TABLE log_records ADD COLUMN site_id TEXT;
+CREATE INDEX IF NOT EXISTS idx_log_records_site_id ON log_records (site_id);
+```
+
+실행 후:
+- 로컬 **통신 설정** 화면에서 "사이트 ID"(예: 서울 사무실)를 입력하고
+  "클라우드 대시보드로 복제 전송"을 켜면, 그 이후 로그부터 site_id가 함께 올라간다.
+- 대시보드 상단의 **사이트** 드롭다운에서 특정 현장만 골라 보거나 "전체"로 볼 수 있다.
+- 하단 **다운로드** 영역에서 사이트/기간/형식(TXT·CSV)을 골라 파일로 받을 수 있다.
+
 ## 참고
 
 - `/api/logs`는 지금은 인증 없이 공개돼 있다. 사내에서만 보게 하려면
@@ -79,6 +97,11 @@ CLOUD_SYNC_API_KEY=<3단계에서 정한 값>
 - 중복 방지는 로컬 `log_records.id`(UUID)를 클라우드 쪽 기본키로 그대로 써서
   `ON CONFLICT(id) DO UPDATE`로 처리한다 — 재시도나 여러 백엔드가 동시에
   같은 레코드를 보내도 D1에는 항상 한 행만 남는다.
+- 다운로드는 TXT와 CSV만 제공한다. 진짜 `.xlsx` 바이너리 생성 라이브러리는
+  Cloudflare Workers 런타임(Node `fs` 등 미지원)에서 안정적으로 돌아간다는
+  보장이 없어, 대신 Excel에서 바로 열리는 CSV로 대체했다(수식 주입 방지용
+  선행 아포스트로피 처리 포함). 로컬 백엔드의 XLSX Export(exceljs 사용, 진짜
+  `.xlsx`)와는 별개다.
 - CLI로 로컬에서 직접 개발/배포하고 싶다면(선택):
   ```bash
   cd cloud-dashboard

@@ -73,6 +73,24 @@ export function MonitorPage() {
       .then((res) => setInfo(res.info))
       .catch(() => setError("상태를 불러오지 못했습니다."));
 
+    // 다른 화면에 갔다 돌아와도(또는 새로고침해도) 최근 기록이 다시 보이도록
+    // DB에서 최근 로그를 먼저 불러온다.
+    apiFetch<{
+      log_records: Array<
+        Omit<LogRecord, "txtStatus" | "xlsxStatus"> & { txt_status?: FileStatus; xlsx_status?: FileStatus }
+      >;
+    }>("/logs?limit=200")
+      .then((res) => {
+        setRecords(res.log_records.map(({ txt_status, xlsx_status, ...rest }) => ({
+          ...rest,
+          txtStatus: txt_status,
+          xlsxStatus: xlsx_status,
+        })));
+      })
+      .catch(() => {
+        /* 로그 조회 실패는 조용히 무시 — 실시간 표시는 계속 동작한다 */
+      });
+
     const unsubscribe = realtimeClient.subscribe((event) => {
       if (event.type === "connection.status") setInfo(event.payload as ConnectionInfo);
       if (event.type === "log.created") {
@@ -164,6 +182,9 @@ export function MonitorPage() {
             </button>
           </>
         )}
+        <button onClick={() => setRecords([])} title="화면 표시만 지웁니다. DB/파일 기록은 그대로 유지됩니다.">
+          화면 지우기
+        </button>
       </div>
 
       <div
@@ -195,7 +216,7 @@ export function MonitorPage() {
         <div ref={bottomRef} />
       </div>
       <p style={{ color: "var(--color-text-muted)", fontSize: 12 }}>
-        새로고침 이전 이력은 표시되지 않습니다(로그 조회 화면은 4단계에서 구현 예정).
+        최근 200건까지 자동으로 불러옵니다. 전체 검색·필터는 로그 조회 화면에서 제공될 예정입니다.
       </p>
 
       {canControl && (
